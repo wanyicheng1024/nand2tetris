@@ -1,0 +1,17 @@
+/**
+ * 1-bit register:
+ * If load[t] == 1 then out[t+1] = in[t]
+ *                 else out does not change (out[t+1] = out[t])
+ * DFF only can make out[t] = in[t-1], so we need send the out[t] back to be the input of start, so that wo can make out[t+1] = out[t]
+ */
+
+CHIP Bit {
+    IN in, load;
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+    Mux(a=preout, b=in, sel=load, out=o1);
+    // send it back
+    DFF(in=o1, out=preout, out=out);
+}
