@@ -1,0 +1,16 @@
+/**
+ * Not gate:
+ * out = not in
+ * when a = 0, Nand(a, a) = Not And(a, a) = 1
+ * when a = 1, Nand(a, a) = Not And(a, a) = 0
+ * so, Not a = Nand(a, a)
+ */
+
+CHIP Not {
+    IN in;
+    OUT out;
+
+    PARTS:
+    // Put your code here:
+    Nand(a=in, b=in, out=out);
+}
