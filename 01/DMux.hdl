@@ -1,0 +1,18 @@
+/**
+ * Demultiplexor:
+ * {a, b} = {in, 0} if sel == 0
+ *          {0, in} if sel == 1
+ * out1 = And(a, Not(sel))
+ * out2 = And(b, sel)
+ */
+
+CHIP DMux {
+    IN in, sel;
+    OUT a, b;
+
+    PARTS:
+    // Put your code here:
+    Not(in=sel, out=o1);
+    And(a=in, b=o1, out=a);
+    And(a=in, b=sel, out=b);
+}
