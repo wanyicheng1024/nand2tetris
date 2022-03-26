@@ -9,7 +9,7 @@ Elements of Computer Systems - Building Modern Computers from scratch
 
 3.Instructional video https://www.coursera.org/learn/build-a-computer or https://www.bilibili.com/video/BV1KJ411s7QJ
 
-4.PDF for book(chinese version) 
+4.PDF for book(chinese version) https://github.com/unproductive-wanyicheng/Books/releases/tag/cs-files.0.0.1
 
 ## About this repository
 
