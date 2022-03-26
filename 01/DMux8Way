@@ -1,0 +1,25 @@
+/**
+ * 8-way demultiplexor:
+ * {a, b, c, d, e, f, g, h} = {in, 0, 0, 0, 0, 0, 0, 0} if sel == 000
+ *                            {0, in, 0, 0, 0, 0, 0, 0} if sel == 001
+ *                            etc.
+ *                            {0, 0, 0, 0, 0, 0, 0, in} if sel == 111
+ * use DMux4Way to generate ab | cd | ef | gh by sel[1..2]
+ * then use DMux to generate a | b by sel[0]
+ * then use DMux to generate c | d by sel[0]
+ * then use DMux to generate e | f by sel[0]
+ * then use DMux to generate g | h by sel[0]
+ */
+
+CHIP DMux8Way {
+    IN in, sel[3];
+    OUT a, b, c, d, e, f, g, h;
+
+    PARTS:
+    // Put your code here:
+    DMux4Way(in = in, sel = sel[1..2], a = o1, b = o2, c = o3, d = o4);
+    DMux(in = o1, sel = sel[0], a = a, b = b);
+    DMux(in = o2, sel = sel[0], a = c, b = d);
+    DMux(in = o3, sel = sel[0], a = e, b = f);
+    DMux(in = o4, sel = sel[0], a = g, b = h);
+}
