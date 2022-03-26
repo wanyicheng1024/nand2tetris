@@ -1,0 +1,16 @@
+/**
+ * Computes the sum of three bits.
+ * the xor means that c1 c2 cannot be 1 together. Beacause c2 = 1 means the o1 + b 'sum = 0; so a + b'sum + c cannot make finally carry = 1
+ */
+
+CHIP FullAdder {
+    IN a, b, c;  // 1-bit inputs
+    OUT sum,     // Right bit of a + b + c
+        carry;   // Left bit of a + b + c
+
+    PARTS:
+    // Put you code here:
+    HalfAdder(a=a, b=b, sum=o1, carry=c1);
+    HalfAdder(a=o1, b=c, sum=sum, carry=c2);
+    Xor(a=c1, b=c2, out=carry);
+}
