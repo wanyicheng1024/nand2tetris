@@ -1,0 +1,97 @@
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // instruction[15] = 0 means is A type instruction, or is C type instruction
+    Not(in = instruction[15], out = isA);
+    Not(in = isA, out = isC);
+
+    // if C type instruction want store ALU output to A regsiter, instruction[5] need be 1
+    // if (isC and instruction[5] = 1) not true, instruction will be the A register input
+    And(a = isC, b = instruction[5], out = isLoadAluOut);
+    Mux16(a = instruction, b = outALU, sel = isLoadAluOut, out = inAR);
+
+    // for make A register can recieve the input value, we need Or(isA, instruction[5])
+    Or(a = isA, b = instruction[5], out = isLoadAR);
+    // A register's value can be addressM'value, think about you  use M = 1 equals to M[A] = 1
+    ARegister(in = inAR, load = isLoadAR, out = outAR, out[0..14] = addressM);
+
+    // ALU decided A register or M 's value to join the computer by instruction[12]
+    Mux16(a = outAR, b = inM, sel = instruction[12], out = outAM);
+
+    // C type instruction and instruction[3] decided writeM
+    And(a = isC, b = instruction[3], out = writeM);
+
+    // C type instruction and instruction[4] decided D register recieve ALU's ouput
+    And(a = isC , b = instruction[4], out = isLoadDR); 
+    DRegister(in = outALU, load = isLoadDR, out = outDR);
+
+    // 6 inputs of ALU, if it is C type instruction, otherwise they are all 0.
+    And(a = isC, b = instruction[6], out = no);
+    And(a = isC, b = instruction[7], out = f);
+    And(a = isC, b = instruction[8], out = ny);
+    And(a = isC, b = instruction[9], out = zy);
+    And(a = isC, b = instruction[10], out = nx);
+    And(a = isC, b = instruction[11], out = zx);
+
+    // think about the asm code we write, ALU can only operater the D, A and M(RAM) to get and set value, A | M can be the ALU's y input
+    // the D register fixed to be the ALU's x input
+    // recall the ALU's 18 type function
+    ALU(x = outDR, y = outAM, zx = zx, nx = nx, zy = zy, ny = ny, f = f, no = no, out = outALU, out = outM, zr=zr, ng=ng);
+
+    // C type instruction and instruction[2, 1, 0] decided the jump funciton
+    And(a = isC, b = instruction[0], out = isGT);
+    And(a = isC, b = instruction[1], out = isEQ);
+    And(a = isC, b = instruction[2], out = isLT);
+
+    // ALU's ouput works together
+    And(a = ng, b = isLT, out = isLtJump);
+    And(a = zr, b = isEQ, out = isEqJump);
+
+    // if not < 0 and not  = 0 it is > 0
+    Not(in = ng, out = notNg);
+    Not(in = zr, out = notZr);
+    And(a = notNg, b = notZr, out = isOutGt);
+    
+    // ALU's ouput works together
+    And(a = isOutGt, b = isGT, out = isGtJump);
+
+    // Or(2, 1, 0) means if only one bit be 1 , the PC need jump the new postion and not increase 1
+    Or(a = isLtJump, b = isEqJump, out = isJump);
+    Or(a = isJump, b = isGtJump, out = jump);
+
+    // the PC always increase itself 1 by default
+    PC(in = outAR, load = jump, inc = true, reset = reset, out[0..14] = pc);
+}
