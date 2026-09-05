@@ -12,7 +12,9 @@ fs.readFile(fileName, 'utf-8', (err, data) => {
 
     // parser([...data], true);
 
-    const binaryOut = parser(data);
+    let binaryOut = parser(data);
+    // 剔除最后一个换行符
+    binaryOut = binaryOut.split('\r\n').filter(c => !!(c.trim())).join('\r\n');
 
     fileName = fileName.split('.')[0];
 
