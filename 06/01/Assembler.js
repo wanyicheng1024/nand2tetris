@@ -8,7 +8,7 @@ fs.readFile(fileName, 'utf-8', (err, data) => {
         throw err;
     }
 
-    data = data.split('\r\n');
+    data = data.split('\n');
 
     // parser([...data], true);
 
