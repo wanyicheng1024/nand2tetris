@@ -16,7 +16,7 @@ function addEntry(symbol, address) {
 }
 
 function contains(symbol) {
-    return !!(symbolsTable[symbol] === undefined);
+    return !!(symbolsTable[symbol] !== undefined);
 }
 
 function GetAddress(symbol) {
