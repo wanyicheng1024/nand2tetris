@@ -520,7 +520,7 @@ function writeIf(command) {
     let label = getLabel(command);
     let out = '';
     out = '@SP \r\n'+
-        'AM = M - 1' + '\r\n' +
+        'A = M - 1' + '\r\n' +
         'D = M' + '\r\n' +
         '@' + label + '\r\n' +
         'D;JGT' + '\r\n' +
